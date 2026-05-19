@@ -8,9 +8,11 @@ Design and roadmap: [BLUEPRINT.md](BLUEPRINT.md).
 
 ## Status
 
-**Milestone 1 (skeleton)** is implemented: package layout, YAML configuration schema,
-CLI skeleton, placeholder FINESSE models, visibility extraction, and unit tests. See
-[docs/milestone-1.md](docs/milestone-1.md).
+**Milestone 2 (FINESSE visibility engine)** is implemented: cavity runner, manual beam
+injection, detuning scans, $V_{00}$ extraction, `finesse-run` CLI, validation tests, and
+demo notebook. See [docs/milestone-2.md](docs/milestone-2.md).
+
+**Milestone 1 (skeleton)** — [docs/milestone-1.md](docs/milestone-1.md).
 
 ## Quick start
 
@@ -26,17 +28,26 @@ oti-pipeline validate-config configs/monte_carlo.yaml
 Use `.venv/bin/python` and `.venv/bin/pip` if you prefer not to activate the venv
 (see [AGENTS.md](AGENTS.md)).
 
-Install **finesse** and **zospy** in `.venv` before running optical simulations
-(Milestones 2–3); they are not required for Milestone 1 unit tests.
+Install **FINESSE 3** for cavity simulations (`conda install -c conda-forge finesse`).
+Unit tests that do not call FINESSE still pass without it. Install **zospy** for Zemax
+export (Milestone 3+).
 
 ## Repository layout
 
 ```text
 configs/           YAML run and tolerance configuration
-finesse/models/    FINESSE .kat models (placeholder in M1)
+finesse/           FINESSE .kat models and Jinja templates
+notebooks/         Demo notebooks (start with 01_validate_nominal_design.ipynb)
 src/optical_truss_ifo_sim/   Python package (`import optical_truss_ifo_sim`)
 tests/             pytest suite
-docs/              Conventions and milestone notes
+docs/              Conventions, FINESSE interface, milestone notes
+```
+
+### FINESSE quick check
+
+```bash
+oti-pipeline finesse-run tests/reference_data/beam_states_nominal.csv \
+  configs/finesse_validation.yaml
 ```
 
 ## License

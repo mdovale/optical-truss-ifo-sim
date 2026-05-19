@@ -67,7 +67,7 @@ Pydantic, and prints a summary table.
 |---------|--------|
 | `validate-config` | Implemented |
 | `zemax-export` | Skeleton (exit 2) |
-| `finesse-run` | Skeleton (exit 2) |
+| `finesse-run` | Implemented in Milestone 2 |
 | `analyze` | Skeleton (exit 2) |
 | `run-full` | Skeleton (exit 2) |
 | `make-report` | Skeleton (exit 2) |
