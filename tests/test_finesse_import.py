@@ -9,7 +9,7 @@ import pytest
 from optical_truss_ifo_sim.finesse_runner import (
     CavityPrescription,
     FinesseNotAvailableError,
-    _steer_mirror_tilts,
+    _steer_beamsplitter_tilts,
     finesse_available,
     load_beam_states,
     render_cavity_kat,
@@ -31,10 +31,10 @@ def test_render_kat_without_finesse_runtime() -> None:
         y_offset_m=0.0,
         x_angle_rad=10e-6,
         y_angle_rad=0.0,
-        wx_m=50e-6,
-        wy_m=50e-6,
-        zx_m=0.0,
-        zy_m=0.0,
+        wx_m=279e-6,
+        wy_m=279e-6,
+        zx_m=0.35,
+        zy_m=0.35,
     )
     cfg = FinesseConfig(
         model_template=Path("finesse/templates/cavity_scan.kat.j2"),
@@ -45,25 +45,32 @@ def test_render_kat_without_finesse_runtime() -> None:
         detuning_points=101,
     )
     script = render_cavity_kat(beam, cfg, CavityPrescription())
-    assert "m_steer" in script
-    assert "w0x=5e-05" in script or "w0x=5e-5" in script
+    assert "bs1" in script
+    assert "bs2" in script
+    assert "Rc=-0.5" in script
+    assert "w0x=0.000279" in script or "w0x=2.79e-4" in script
 
 
-def test_steer_mirror_tilts_combine_offset_and_angle() -> None:
+def test_steer_beamsplitter_tilts_separate_offset_and_angle() -> None:
     beam = BeamState(
         sample_id="s",
         x_offset_m=2e-6,
         y_offset_m=0.0,
         x_angle_rad=4e-6,
         y_angle_rad=0.0,
-        wx_m=50e-6,
-        wy_m=50e-6,
-        zx_m=0.0,
-        zy_m=0.0,
+        wx_m=279e-6,
+        wy_m=279e-6,
+        zx_m=0.35,
+        zy_m=0.35,
     )
-    xbeta, ybeta = _steer_mirror_tilts(beam, steer_arm_m=0.01)
-    assert xbeta == pytest.approx(4e-6 / 2.0 + 2e-6 / 0.02)
-    assert ybeta == 0.0
+    xbeta_1, ybeta_1, xbeta_2, ybeta_2 = _steer_beamsplitter_tilts(
+        beam,
+        steer_arm_m=0.01,
+    )
+    assert xbeta_1 == pytest.approx(2e-6 / 0.02 - 4e-6 / 2.0)
+    assert xbeta_2 == pytest.approx(4e-6 - 2e-6 / 0.02)
+    assert ybeta_1 == 0.0
+    assert ybeta_2 == 0.0
 
 
 def test_load_beam_states_csv() -> None:
@@ -83,10 +90,10 @@ def test_results_to_dataframe_columns() -> None:
         y_offset_m=0.0,
         x_angle_rad=0.0,
         y_angle_rad=0.0,
-        wx_m=92e-6,
-        wy_m=92e-6,
-        zx_m=0.0,
-        zy_m=0.0,
+        wx_m=279e-6,
+        wy_m=279e-6,
+        zx_m=0.35,
+        zy_m=0.35,
     )
     cfg = FinesseConfig(
         model_template=Path("finesse/templates/cavity_scan.kat.j2"),
@@ -99,6 +106,8 @@ def test_results_to_dataframe_columns() -> None:
     result = run_cavity_scan(beam, cfg)
     frame = results_to_dataframe([result])
     assert "v_00" in frame.columns
+    assert "x_offset_m" in frame.columns
+    assert "scan_points" in frame.columns
     assert frame.iloc[0]["sample_id"] == "df"
 
 

@@ -38,16 +38,17 @@ NOMINAL_BEAM = BeamState(
     y_offset_m=0.0,
     x_angle_rad=0.0,
     y_angle_rad=0.0,
-    wx_m=92e-6,
-    wy_m=92e-6,
-    zx_m=0.0,
-    zy_m=0.0,
+    wx_m=279e-6,
+    wy_m=279e-6,
+    zx_m=0.35,
+    zy_m=0.35,
 )
 
 
 def test_render_cavity_kat_contains_beam_parameters() -> None:
     script = render_cavity_kat(NOMINAL_BEAM, FINESSE_CFG, CavityPrescription())
-    assert "w0x=9.2e-05" in script or "w0x=9.2e-5" in script
+    assert "w0x=0.000279" in script or "w0x=2.79e-4" in script
+    assert "Rc=-0.5" in script
     assert "xaxis(L0.f" in script
     assert "pd refl" in script
 
@@ -56,7 +57,7 @@ def test_nominal_visibility_high() -> None:
     result = run_cavity_scan(NOMINAL_BEAM, FINESSE_CFG)
     assert result.status == SampleStatus.OK
     assert result.visibility.ok
-    assert result.v_00 > 0.5
+    assert result.v_00 > 0.95
 
 
 def test_lateral_offset_reduces_visibility() -> None:
@@ -79,7 +80,7 @@ def test_angular_misalignment_reduces_visibility() -> None:
 
 def test_waist_mismatch_reduces_visibility() -> None:
     mismatched = NOMINAL_BEAM.model_copy(
-        update={"sample_id": "waist", "wx_m": 150e-6}
+        update={"sample_id": "waist", "wx_m": 350e-6}
     )
     nominal = run_cavity_scan(NOMINAL_BEAM, FINESSE_CFG)
     bad = run_cavity_scan(mismatched, FINESSE_CFG)
