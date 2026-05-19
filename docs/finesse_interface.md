@@ -31,11 +31,11 @@ the public API which performs the scrub before import.
 | `finesse/models/test_cavity.kat` | Static reference model (same geometry) |
 | `finesse/models/oti_cavity.kat` | Production cavity (future milestones) |
 
-The test cavity is a two-mirror Fabry–Perot resonator with:
+The test cavity is an OTI-like two-mirror Fabry–Perot resonator with:
 
-- Input steering mirror `m_steer` (maps beam offset/angle to `xbeta`/`ybeta`)
-- High-reflectivity mirrors `m1`, `m2` with radius of curvature ±0.5 m
-- Cavity length 0.1 m
+- Two computational steering beamsplitters, `bs1` and `bs2`, before the cavity input
+- High-reflectivity mirrors `m1`, `m2` with FINESSE radii of curvature -0.5 m and +0.5 m
+- Cavity length 0.7 m
 - Reflected-power detector `pd refl` on the input port
 - Hermite–Gaussian basis `modes(maxtem=…)` from configuration
 
@@ -47,14 +47,16 @@ in `configs/finesse.yaml`.
 Each row of the beam-state table (`BeamState` in `schemas.py`) supplies SI parameters
 at the cavity input reference plane (see `docs/coordinate_conventions.md`):
 
-- Waists `wx_m`, `wy_m` and waist positions `zx_m`, `zy_m` → `gauss` at the laser node
-- Lateral offsets and propagation angles → steering mirror tilts:
+- Waists `wx_m`, `wy_m` and waist positions `zx_m`, `zy_m` → `gauss` at the laser node,
+  translated from the cavity input reference plane to the upstream laser node
+- Lateral offsets and propagation angles → two steering beamsplitter tilts:
 
-  - `xbeta ≈ x_angle_rad / 2 + x_offset_m / (2 * steer_arm_m)` (and similarly for *y*)
+  - First reflection: `xbeta_1 ≈ x_offset_m / (2 * steer_arm_m) - x_angle_rad / 2`
+  - Second reflection: `xbeta_2 ≈ x_angle_rad - x_offset_m / (2 * steer_arm_m)`
 
-This is a compact single-mirror steerer one `steer_arm_m` (default 10 mm) before the
-input mirror. It is adequate for Milestone 2 sensitivity checks; paired-mirror steering
-may replace it when Zemax handoff validation requires independent actuator control.
+This is a compact periscope-style adapter with `steer_arm_m = 10 mm` segments. It is
+not OTI hardware; it gives FINESSE a requested beam state while preserving independent
+first-order control of offset and angle at the cavity input reference plane.
 
 ## Python API
 

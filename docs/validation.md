@@ -9,7 +9,7 @@ Reference beam states: `tests/reference_data/beam_states_nominal.csv`.
 
 | Case | Perturbation | Expected behaviour |
 |------|--------------|-------------------|
-| `nominal` | Mode-matched Gaussian at cavity input | $V_{00} \gtrsim 0.5$ (high visibility) |
+| `nominal` | Mode-matched Gaussian at cavity input | $V_{00} \gtrsim 0.95$ (high visibility) |
 | `offset_x` | 5 µm lateral offset | $V_{00}$ lower than nominal |
 | `angle_x` | 50 µrad yaw | $V_{00}$ lower than nominal |
 | `waist_mismatch` | Larger $w_x$ | $V_{00}$ lower than nominal |

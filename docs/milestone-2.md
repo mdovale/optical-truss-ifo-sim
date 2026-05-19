@@ -40,7 +40,8 @@ oti-pipeline finesse-run tests/reference_data/beam_states_nominal.csv configs/fi
 ## Workflow
 
 1. Define beam states manually (CSV/Parquet) or, in later milestones, export from Zemax.
-2. Render `cavity_scan.kat.j2` per sample with waists, steering tilts, and detuning grid.
+2. Render `cavity_scan.kat.j2` per sample with waist parameters, two-reflection
+   steering tilts, and detuning grid.
 3. Run FINESSE `xaxis(L0.f, …)` and read reflected power `pd refl`.
 4. Compute $V_{00} = (P_{\max} - P_{\min}) / (P_{\max} + P_{\min})$ via `visibility.py`.
 
