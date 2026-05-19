@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from optical_truss_ifo_sim.cli import app
@@ -33,3 +34,19 @@ def test_stub_command_returns_exit_2() -> None:
     assert result.exit_code == 2
     assert "zemax-export" in result.stdout
     assert "CLI skeleton for Milestone 1" in result.stdout
+
+
+def test_finesse_run_without_finesse_installed() -> None:
+    from optical_truss_ifo_sim.finesse_runner import finesse_available
+
+    if finesse_available():
+        pytest.skip("FINESSE is installed; use integration test instead")
+
+    config = REPO_ROOT / "configs" / "finesse_validation.yaml"
+    beams = REPO_ROOT / "tests" / "reference_data" / "beam_states_nominal.csv"
+    result = runner.invoke(
+        app,
+        ["finesse-run", str(beams), str(config)],
+    )
+    assert result.exit_code == 1
+    assert "FINESSE 3 is not installed" in result.stdout

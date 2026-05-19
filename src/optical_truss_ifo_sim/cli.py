@@ -11,6 +11,12 @@ from rich.table import Table
 
 from optical_truss_ifo_sim import __version__
 from optical_truss_ifo_sim.config import ConfigError, load_config, resolve_repo_paths
+from optical_truss_ifo_sim.finesse_runner import (
+    finesse_available,
+    load_beam_states,
+    run_beam_batch,
+    write_finesse_results,
+)
 
 app = typer.Typer(
     name="oti-pipeline",
@@ -93,12 +99,52 @@ def zemax_export(
 def finesse_run(
     beam_states: Annotated[
         Path,
-        typer.Argument(help="Parquet/CSV beam-state table from Zemax export."),
+        typer.Argument(help="Parquet/CSV beam-state table (manual or Zemax export)."),
     ],
     config_path: Annotated[Path, typer.Argument(help="Pipeline configuration YAML.")],
+    output: Annotated[
+        Path | None,
+        typer.Option(
+            "--output",
+            "-o",
+            help="Results table path (default: <run.output_dir>/finesse_results.csv).",
+        ),
+    ] = None,
 ) -> None:
-    """Run FINESSE for each beam state (not implemented until Milestone 2)."""
-    _stub_command("finesse-run", config_path, extra=f"beam_states={beam_states}")
+    """Run FINESSE cavity scans and extract TEM00 visibility for each beam state."""
+    if not finesse_available():
+        console.print(
+            "[red]FINESSE 3 is not installed[/red] in this environment. "
+            "Install with: conda install -c conda-forge finesse"
+        )
+        raise typer.Exit(code=1)
+
+    repo = _repo_root()
+    try:
+        cfg = load_config(config_path, repo_root=repo)
+        cfg = resolve_repo_paths(cfg, repo)
+    except ConfigError as exc:
+        console.print(f"[red]Config error:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    beam_path = beam_states if beam_states.is_absolute() else (repo / beam_states)
+    try:
+        beams = load_beam_states(beam_path)
+    except (FileNotFoundError, ValueError) as exc:
+        console.print(f"[red]Beam states:[/red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print(f"Running FINESSE for [cyan]{len(beams)}[/cyan] beam state(s)...")
+    results = run_beam_batch(beams, cfg.finesse)
+    out_path = output or (cfg.run.output_dir / "finesse_results.csv")
+    if not out_path.is_absolute():
+        out_path = repo / out_path
+    write_finesse_results(results, out_path)
+
+    ok = sum(1 for r in results if r.status.value == "OK")
+    console.print(
+        f"[green]Wrote {out_path}[/green] — {ok}/{len(results)} samples with status OK."
+    )
 
 
 @app.command("analyze")
