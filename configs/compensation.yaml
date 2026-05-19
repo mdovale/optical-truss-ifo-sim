@@ -1,0 +1,11 @@
+# Input-beam collimator compensation (BLUEPRINT section 2.4).
+compensation:
+  enabled: false
+  x_range_m: [-1.0e-3, 1.0e-3]
+  y_range_m: [-1.0e-3, 1.0e-3]
+  theta_x_range_rad: [-1.0e-3, 1.0e-3]
+  theta_y_range_rad: [-1.0e-3, 1.0e-3]
+  x_resolution_m: 1.0e-6
+  y_resolution_m: 1.0e-6
+  theta_x_resolution_rad: 1.745e-5
+  theta_y_resolution_rad: 1.745e-5

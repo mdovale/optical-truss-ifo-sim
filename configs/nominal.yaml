@@ -1,0 +1,11 @@
+# Nominal run and Zemax model paths for validation workflows.
+run:
+  name: nominal_validation
+  random_seed: 0
+  n_samples: 1
+  output_dir: data/processed/nominal_validation
+
+zemax:
+  model_path: zemax/models/oti_input_stage.zmx
+  reference_plane: cavity_input
+  wavelength_m: 1.064e-6

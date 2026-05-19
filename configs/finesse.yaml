@@ -1,0 +1,7 @@
+# Default FINESSE cavity scan settings (see BLUEPRINT section 10.1).
+finesse:
+  model_path: finesse/models/test_cavity.kat
+  maxtem: 10
+  detuning_start_hz: -10.0e6
+  detuning_stop_hz: 10.0e6
+  detuning_points: 2001

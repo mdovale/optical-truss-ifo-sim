@@ -1,0 +1,15 @@
+# Monte Carlo campaign configuration (BLUEPRINT section 10.1).
+includes:
+  - nominal.yaml
+  - finesse.yaml
+  - compensation.yaml
+  - tolerances.yaml
+
+run:
+  name: nominal_oti_mc
+  random_seed: 12345
+  n_samples: 1000
+  output_dir: data/processed/nominal_oti_mc
+
+compensation:
+  enabled: true

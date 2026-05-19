@@ -1,0 +1,36 @@
+# Manufacturing and alignment tolerances (expand as the prescription is finalized).
+tolerances:
+  lens_1_radius:
+    distribution: uniform
+    nominal_m: 15.979e-3
+    half_width_m: 0.034e-3
+
+  lens_1_thickness:
+    distribution: uniform
+    nominal_m: 4.45e-3
+    half_width_m: 50.0e-6
+
+  lens_1_lens_2_separation:
+    distribution: uniform
+    nominal_m: 17.26e-3
+    half_width_m: 50.0e-6
+
+  lens_1_decenter_x:
+    distribution: uniform
+    nominal_m: 0.0
+    half_width_m: 5.0e-6
+
+  lens_1_decenter_y:
+    distribution: uniform
+    nominal_m: 0.0
+    half_width_m: 5.0e-6
+
+  lens_1_tilt_x:
+    distribution: uniform
+    nominal_rad: 0.0
+    half_width_rad: 140.0e-6
+
+  lens_1_tilt_y:
+    distribution: uniform
+    nominal_rad: 0.0
+    half_width_rad: 140.0e-6
