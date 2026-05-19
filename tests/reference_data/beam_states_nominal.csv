@@ -1,0 +1,5 @@
+sample_id,x_offset_m,y_offset_m,x_angle_rad,y_angle_rad,wx_m,wy_m,zx_m,zy_m
+nominal,0,0,0,0,9.2e-05,9.2e-05,0,0
+offset_x,5e-06,0,0,0,9.2e-05,9.2e-05,0,0
+angle_x,0,0,50e-06,0,9.2e-05,9.2e-05,0,0
+waist_mismatch,0,0,0,0,1.5e-04,9.2e-05,0,0
