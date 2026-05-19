@@ -1,13 +1,20 @@
-# Placeholder FINESSE 3 model for Milestone 1 (skeleton repository).
-#
-# Milestone 2 will replace this with a runnable two-mirror Fabry-Perot cavity,
-# Hermite-Gaussian mode coupling, and frequency detuning scans for V_00 extraction.
-#
-# Reference: BLUEPRINT.md sections 5.3, 9, and Milestone 2.
+# Reference static FINESSE model for the Milestone 2 test cavity.
+# Programmatic scans use finesse/templates/cavity_scan.kat.j2 instead.
 
-# Expected elements (not yet defined):
-#   - Input mirror and return mirror with reflectivities and curvatures
-#   - Cavity length and losses
-#   - Gaussian beam injection (waist, waist position, offset, angle)
-#   - maxtem spatial-mode cutoff
-#   - Laser frequency / phase detuning scan
+l L0 P=1
+gauss g0 L0.p1.o w0x=92e-6 w0y=92e-6 zx=0 zy=0
+modes(maxtem=10)
+
+s s_steer L0.p1 m_steer.p1 L=10m
+m m_steer R=1 T=0 xbeta=0 ybeta=0
+s s_in m_steer.p2 m1.p1 L=10m
+
+m m1 R=0.99 T=0.01 Rc=0.5
+s CAV m1.p2 m2.p1 L=0.1
+m m2 R=0.99 T=0.01 Rc=-0.5
+
+pd refl m1.p1.o
+
+cavity cav source=m1.p2.o via=m2.p1.i priority=1
+
+xaxis(L0.f, lin, -10M, 10M, 2001)

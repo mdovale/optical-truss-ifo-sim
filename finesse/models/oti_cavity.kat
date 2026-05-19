@@ -1,6 +1,7 @@
-# OTI compact Fabry-Perot cavity — production FINESSE model (placeholder).
+# OTI compact Fabry-Perot cavity — production FINESSE model (future).
 #
-# This file will hold the version-controlled cavity prescription used for
-# tolerance and Monte Carlo campaigns once Milestone 2 is complete.
+# Milestone 2 uses finesse/models/test_cavity.kat and the Jinja template
+# finesse/templates/cavity_scan.kat.j2 for validation. This file will track the
+# as-built OTI cavity prescription once the optical design is frozen.
 #
 # Coordinate and beam-parameter conventions: docs/coordinate_conventions.md

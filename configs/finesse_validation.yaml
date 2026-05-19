@@ -1,0 +1,18 @@
+# FINESSE-only validation workflow (Milestone 2; no Zemax export required).
+includes:
+  - nominal.yaml
+  - finesse.yaml
+
+run:
+  name: finesse_validation
+  random_seed: 42
+  n_samples: 1
+  output_dir: data/processed/finesse_validation
+
+finesse:
+  model_template: finesse/templates/cavity_scan.kat.j2
+  model_path: finesse/models/test_cavity.kat
+  maxtem: 10
+  detuning_start_hz: -5.0e6
+  detuning_stop_hz: 5.0e6
+  detuning_points: 1001
