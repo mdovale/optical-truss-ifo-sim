@@ -12,7 +12,12 @@ import numpy as np
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from optical_truss_ifo_sim.schemas import BeamState, FinesseConfig, SampleStatus, VisibilityQCFlag
+from optical_truss_ifo_sim.schemas import (
+    BeamState,
+    FinesseConfig,
+    SampleStatus,
+    VisibilityQCFlag,
+)
 from optical_truss_ifo_sim.visibility import VisibilityResult, compute_visibility_00
 
 if TYPE_CHECKING:
@@ -25,14 +30,19 @@ class FinesseNotAvailableError(RuntimeError):
 
 @dataclass(frozen=True)
 class CavityPrescription:
-    """Fixed two-mirror test cavity used for Milestone 2 validation."""
+    """Fixed OTI-like two-mirror cavity used for Milestone 2 validation."""
 
-    cavity_length_m: float = 0.1
-    mirror_r: float = 0.99
-    mirror_t: float = 0.01
+    cavity_length_m: float = 0.7
+    mirror_r: float = 0.998
+    mirror_t: float = 0.002
     mirror_rc_m: float = 0.5
     steer_arm_m: float = 0.01
     laser_power_w: float = 1.0
+
+    @property
+    def input_path_m(self) -> float:
+        """Path length from the laser node to the cavity input mirror."""
+        return 3.0 * self.steer_arm_m
 
 
 @dataclass(frozen=True)
@@ -40,6 +50,8 @@ class FinesseScanResult:
     """One beam state, reflected-power trace, and extracted visibility."""
 
     sample_id: str
+    beam: BeamState
+    finesse_config: FinesseConfig
     detuning_hz: np.ndarray
     reflected_power: np.ndarray
     visibility: VisibilityResult
@@ -122,21 +134,30 @@ def _import_finesse() -> ModuleType:
     return finesse
 
 
-def _steer_mirror_tilts(beam: BeamState, steer_arm_m: float) -> tuple[float, float]:
+def _steer_beamsplitter_tilts(
+    beam: BeamState,
+    steer_arm_m: float,
+) -> tuple[float, float, float, float]:
     """
-    Map beam offset and angle at the cavity input to steering-mirror tilts.
+    Map requested cavity-input offset and angle to two steering reflections.
 
-    Uses a single mirror one *steer_arm_m* before the input mirror. Reflected-beam
-    angle change is approximately ``2 * xbeta``; lateral shift at the cavity is
-    approximately ``2 * steer_arm_m * xbeta`` for small angles.
+    The adapter is computational, not OTI hardware. Two perfectly reflecting
+    beamsplitters separated from each other and the input mirror by ``steer_arm_m``
+    provide independent first-order control of lateral displacement and propagation
+    angle at the cavity input reference plane.
     """
     if steer_arm_m <= 0.0:
         msg = "steer_arm_m must be positive"
         raise ValueError(msg)
-    scale = 1.0 / (2.0 * steer_arm_m)
-    xbeta = beam.x_angle_rad / 2.0 + beam.x_offset_m * scale
-    ybeta = beam.y_angle_rad / 2.0 + beam.y_offset_m * scale
-    return xbeta, ybeta
+
+    def _axis_tilts(offset_m: float, angle_rad: float) -> tuple[float, float]:
+        first = offset_m / (2.0 * steer_arm_m) - angle_rad / 2.0
+        second = angle_rad - offset_m / (2.0 * steer_arm_m)
+        return first, second
+
+    xbeta_1, xbeta_2 = _axis_tilts(beam.x_offset_m, beam.x_angle_rad)
+    ybeta_1, ybeta_2 = _axis_tilts(beam.y_offset_m, beam.y_angle_rad)
+    return xbeta_1, ybeta_1, xbeta_2, ybeta_2
 
 
 def render_cavity_kat(
@@ -155,18 +176,25 @@ def render_cavity_kat(
         autoescape=False,
     )
     template = env.get_template("cavity_scan.kat.j2")
-    xbeta, ybeta = _steer_mirror_tilts(beam, cavity.steer_arm_m)
+    xbeta_1, ybeta_1, xbeta_2, ybeta_2 = _steer_beamsplitter_tilts(
+        beam,
+        cavity.steer_arm_m,
+    )
+    gauss_zx_m = -(beam.zx_m + cavity.input_path_m)
+    gauss_zy_m = -(beam.zy_m + cavity.input_path_m)
     return template.render(
         sample_id=beam.sample_id,
         laser_power_w=cavity.laser_power_w,
         wx_m=beam.wx_m,
         wy_m=beam.wy_m,
-        zx_m=beam.zx_m,
-        zy_m=beam.zy_m,
+        zx_m=gauss_zx_m,
+        zy_m=gauss_zy_m,
         maxtem=finesse_cfg.maxtem,
         steer_arm_m=cavity.steer_arm_m,
-        steer_xbeta_rad=xbeta,
-        steer_ybeta_rad=ybeta,
+        steer_xbeta_1_rad=xbeta_1,
+        steer_ybeta_1_rad=ybeta_1,
+        steer_xbeta_2_rad=xbeta_2,
+        steer_ybeta_2_rad=ybeta_2,
         mirror_r=cavity.mirror_r,
         mirror_t=cavity.mirror_t,
         mirror_rc_m=cavity.mirror_rc_m,
@@ -218,6 +246,8 @@ def run_cavity_scan(
         )
         return FinesseScanResult(
             sample_id=beam.sample_id,
+            beam=beam,
+            finesse_config=finesse_cfg,
             detuning_hz=detuning_hz,
             reflected_power=reflected_power,
             visibility=visibility,
@@ -231,6 +261,8 @@ def run_cavity_scan(
         status = SampleStatus.OK
     return FinesseScanResult(
         sample_id=beam.sample_id,
+        beam=beam,
+        finesse_config=finesse_cfg,
         detuning_hz=detuning_hz,
         reflected_power=reflected_power,
         visibility=visibility,
@@ -273,6 +305,18 @@ def results_to_dataframe(results: list[FinesseScanResult]) -> pd.DataFrame:
         row: dict[str, Any] = {
             "sample_id": item.sample_id,
             "status": item.status.value,
+            "x_offset_m": item.beam.x_offset_m,
+            "y_offset_m": item.beam.y_offset_m,
+            "x_angle_rad": item.beam.x_angle_rad,
+            "y_angle_rad": item.beam.y_angle_rad,
+            "wx_m": item.beam.wx_m,
+            "wy_m": item.beam.wy_m,
+            "zx_m": item.beam.zx_m,
+            "zy_m": item.beam.zy_m,
+            "maxtem": item.finesse_config.maxtem,
+            "scan_min_hz": float(item.detuning_hz[0]) if len(item.detuning_hz) else np.nan,
+            "scan_max_hz": float(item.detuning_hz[-1]) if len(item.detuning_hz) else np.nan,
+            "scan_points": len(item.detuning_hz),
             "v_00": item.visibility.v_00,
             "p_max": item.visibility.p_max,
             "p_min": item.visibility.p_min,

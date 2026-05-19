@@ -2,16 +2,18 @@
 # Programmatic scans use finesse/templates/cavity_scan.kat.j2 instead.
 
 l L0 P=1
-gauss g0 L0.p1.o w0x=92e-6 w0y=92e-6 zx=0 zy=0
+gauss g0 L0.p1.o w0x=279e-6 w0y=279e-6 zx=-0.38 zy=-0.38
 modes(maxtem=10)
 
-s s_steer L0.p1 m_steer.p1 L=10m
-m m_steer R=1 T=0 xbeta=0 ybeta=0
-s s_in m_steer.p2 m1.p1 L=10m
+s s_steer1 L0.p1 bs1.p1 L=0.01
+bs bs1 R=1 T=0 alpha=45 xbeta=0 ybeta=0
+s s_steer2 bs1.p2 bs2.p1 L=0.01
+bs bs2 R=1 T=0 alpha=45 xbeta=0 ybeta=0
+s s_in bs2.p2 m1.p1 L=0.01
 
-m m1 R=0.99 T=0.01 Rc=0.5
-s CAV m1.p2 m2.p1 L=0.1
-m m2 R=0.99 T=0.01 Rc=-0.5
+m m1 R=0.998 T=0.002 Rc=-0.5
+s CAV m1.p2 m2.p1 L=0.7
+m m2 R=0.998 T=0.002 Rc=0.5
 
 pd refl m1.p1.o
 

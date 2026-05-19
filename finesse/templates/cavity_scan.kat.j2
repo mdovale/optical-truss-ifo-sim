@@ -5,13 +5,15 @@ l L0 P={{ laser_power_w }}
 gauss g0 L0.p1.o w0x={{ wx_m }} w0y={{ wy_m }} zx={{ zx_m }} zy={{ zy_m }}
 modes(maxtem={{ maxtem }})
 
-s s_steer L0.p1 m_steer.p1 L={{ steer_arm_m }}
-m m_steer R=1 T=0 xbeta={{ steer_xbeta_rad }} ybeta={{ steer_ybeta_rad }}
-s s_in m_steer.p2 m1.p1 L={{ steer_arm_m }}
+s s_steer1 L0.p1 bs1.p1 L={{ steer_arm_m }}
+bs bs1 R=1 T=0 alpha=45 xbeta={{ steer_xbeta_1_rad }} ybeta={{ steer_ybeta_1_rad }}
+s s_steer2 bs1.p2 bs2.p1 L={{ steer_arm_m }}
+bs bs2 R=1 T=0 alpha=45 xbeta={{ steer_xbeta_2_rad }} ybeta={{ steer_ybeta_2_rad }}
+s s_in bs2.p2 m1.p1 L={{ steer_arm_m }}
 
-m m1 R={{ mirror_r }} T={{ mirror_t }} Rc={{ mirror_rc_m }}
+m m1 R={{ mirror_r }} T={{ mirror_t }} Rc=-{{ mirror_rc_m }}
 s CAV m1.p2 m2.p1 L={{ cavity_length_m }}
-m m2 R={{ mirror_r }} T={{ mirror_t }} Rc=-{{ mirror_rc_m }}
+m m2 R={{ mirror_r }} T={{ mirror_t }} Rc={{ mirror_rc_m }}
 
 pd refl m1.p1.o
 
