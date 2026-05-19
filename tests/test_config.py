@@ -24,7 +24,6 @@ def test_load_monte_carlo_config() -> None:
     assert cfg.compensation is not None
     assert cfg.compensation.enabled is True
     assert cfg.tolerances is not None
-    assert cfg.tolerances is not None
     assert "lens_1_radius" in cfg.tolerances
 
 
@@ -87,6 +86,36 @@ def test_compensation_range_order() -> None:
             y_resolution_m=1e-6,
             theta_x_resolution_rad=1e-5,
             theta_y_resolution_rad=1e-5,
+        )
+
+
+def test_tolerance_distribution_requires_matching_spread() -> None:
+    from pydantic import ValidationError
+
+    from optical_truss_ifo_sim.schemas import ToleranceParameter
+
+    ToleranceParameter(
+        distribution="uniform",
+        nominal_m=1.0,
+        half_width_m=0.1,
+    )
+    with pytest.raises(ValidationError, match="requires std_rad"):
+        ToleranceParameter(
+            distribution="normal",
+            nominal_rad=0.0,
+            half_width_rad=1e-6,
+        )
+    with pytest.raises(ValidationError, match="spread units"):
+        ToleranceParameter(
+            distribution="uniform",
+            nominal_m=1.0,
+            half_width_rad=1e-6,
+        )
+    with pytest.raises(ValidationError, match="Exactly one"):
+        ToleranceParameter(
+            distribution="fixed",
+            nominal_m=1.0,
+            nominal_rad=0.0,
         )
 
 

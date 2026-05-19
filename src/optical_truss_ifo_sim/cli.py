@@ -29,8 +29,9 @@ def _repo_root() -> Path:
     return Path.cwd()
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
+    ctx: typer.Context,
     version: Annotated[
         bool,
         typer.Option("--version", "-V", help="Show version and exit."),
@@ -38,6 +39,9 @@ def main(
 ) -> None:
     if version:
         typer.echo(f"optical-truss-ifo-sim {__version__}")
+        raise typer.Exit()
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
         raise typer.Exit()
 
 

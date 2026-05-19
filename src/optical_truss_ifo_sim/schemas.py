@@ -140,9 +140,39 @@ class ToleranceParameter(BaseModel):
     std_rad: float | None = Field(default=None, gt=0.0)
 
     @model_validator(mode="after")
-    def _nominal_present(self) -> ToleranceParameter:
-        if self.nominal_m is None and self.nominal_rad is None:
-            msg = "Either nominal_m or nominal_rad must be set"
+    def _distribution_parameters(self) -> ToleranceParameter:
+        nominal_is_length = self.nominal_m is not None
+        nominal_is_angle = self.nominal_rad is not None
+        if nominal_is_length == nominal_is_angle:
+            msg = "Exactly one of nominal_m or nominal_rad must be set"
+            raise ValueError(msg)
+
+        unit = "m" if nominal_is_length else "rad"
+        other_unit = "rad" if nominal_is_length else "m"
+        half_width = getattr(self, f"half_width_{unit}")
+        std = getattr(self, f"std_{unit}")
+        other_half_width = getattr(self, f"half_width_{other_unit}")
+        other_std = getattr(self, f"std_{other_unit}")
+        if other_half_width is not None or other_std is not None:
+            msg = "Tolerance spread units must match the nominal unit"
+            raise ValueError(msg)
+
+        if self.distribution == "uniform":
+            if half_width is None:
+                msg = f"uniform distribution requires half_width_{unit}"
+                raise ValueError(msg)
+            if std is not None:
+                msg = f"uniform distribution must not set std_{unit}"
+                raise ValueError(msg)
+        elif self.distribution == "normal":
+            if std is None:
+                msg = f"normal distribution requires std_{unit}"
+                raise ValueError(msg)
+            if half_width is not None:
+                msg = f"normal distribution must not set half_width_{unit}"
+                raise ValueError(msg)
+        elif half_width is not None or std is not None:
+            msg = "fixed distribution must not set spread parameters"
             raise ValueError(msg)
         return self
 
