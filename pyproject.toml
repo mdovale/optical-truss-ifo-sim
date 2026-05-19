@@ -9,7 +9,7 @@ description = "OTI cavity tolerance simulation: Zemax beam export and FINESSE vi
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary" }
-authors = [{ name = "OTI Simulation Team" }]
+authors = [{ name = "Miguel Dovale" }]
 dependencies = [
     "numpy>=1.26",
     "scipy>=1.11",
