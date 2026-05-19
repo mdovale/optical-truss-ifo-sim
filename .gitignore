@@ -12,3 +12,4 @@ data/raw/
 data/intermediate/
 data/processed/
 reports/
+.cursor/read-only-references/
