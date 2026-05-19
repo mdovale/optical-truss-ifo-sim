@@ -2,10 +2,10 @@
 
 ## Python environment
 
-Use the shared **optisim** virtualenv (not system Python, not a repo-local `venv/`):
+Use the repository **`.venv`** at the project root (not system Python):
 
-`/Users/mdovale/Work-local/__virtual-environments/optisim`
+`.venv/bin/python`
 
-- **FINESSE 3** and **ZOSPy** are installed there.
-- Interpreter: `.../optisim/bin/python`
-- See `.cursor/rules/optisim-venv.mdc` for shell and command conventions.
+- **FINESSE 3** and **ZOSPy** should be installed in this venv.
+- **This repo’s** pip dependencies and CLI are defined in `pyproject.toml`; install with `pip install -e ".[dev]"` after activating `.venv` (see `BLUEPRINT.md` §5.1).
+- See `.cursor/rules/python-venv.mdc` for shell and command conventions.

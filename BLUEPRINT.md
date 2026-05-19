@@ -120,8 +120,8 @@ optical-truss-ifo-sim/
 ├── README.md
 ├── BLUEPRINT.md
 ├── pyproject.toml
-├── environment.yml
 ├── .gitignore
+├── .venv/                  # local virtualenv (gitignored)
 ├── configs/
 │   ├── nominal.yaml
 │   ├── tolerances.yaml
@@ -185,27 +185,47 @@ optical-truss-ifo-sim/
 
 ### 5.1 Python environment
 
-The Python environment should manage all orchestration and analysis. Recommended core dependencies:
+Orchestration and analysis run in a **repository-local `.venv`** at the project root. That environment is the single source of truth for the interpreter, **FINESSE 3**, **ZOSPy**, and pip-installed project dependencies. Do not use system `python`/`pip` for this repo. Prefer `.venv` over Conda or a shared external venv unless explicitly requested.
 
-- `numpy`
-- `scipy`
-- `pandas`
+| Item | Location |
+|------|----------|
+| Virtual environment | `.venv/` (gitignored) |
+| Agent / editor conventions | `AGENTS.md`, `.cursor/rules/python-venv.mdc` |
+| Package metadata and pip deps | `pyproject.toml` |
+| Worktree sanity check | `.cursor/scripts/ensure-venv.sh` |
+
+**Setup (once per machine or after cloning):**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+Install **finesse** and **zospy** into `.venv` as required (via `pyproject.toml` or documented pins). Use `.venv/bin/python` and `.venv/bin/pip` directly when activation is inconvenient (see `AGENTS.md`).
+
+**`pyproject.toml`** declares this package (`oti_tolerance_pipeline`), its version-pinned dependencies, optional extras (e.g. `dev` for pytest and linters), and the `oti-pipeline` CLI entry point. If ZOSPy import fails, fix the host .NET/Mono and Zemax setup per `.cursor/rules/python-venv.mdc`; do not switch to system Python or another environment.
+
+**Heavy simulation stack** (must be present in `.venv`):
+
+- `finesse` (FINESSE 3)
+- `zospy` (Zemax OpticStudio via ZOS-API)
+
+**Declared in `pyproject.toml`** (typical core set):
+
+- `numpy`, `scipy`, `pandas`
 - `xarray` or `h5py`
-- `pydantic`
-- `pyyaml`
+- `pydantic`, `pyyaml`
 - `matplotlib`
 - `click` or `typer`
-- `pytest`
 - `jinja2`
-- `zospy`
-- `finesse`
 
-Optional dependencies:
+**Optional extras** (e.g. `[parallel]`, `[dev]` in `pyproject.toml`):
 
-- `joblib`, `dask`, or `ray` for parallel execution.
-- `plotly` for interactive diagnostics.
-- `rich` for command-line progress reporting.
-- `ruff`, `black`, and `mypy` for code quality.
+- `joblib`, `dask`, or `ray` for parallel execution
+- `plotly` for interactive diagnostics
+- `rich` for command-line progress reporting
+- `pytest`, `ruff`, `black`, and `mypy` for development
 
 ### 5.2 Zemax and ZOSPy
 
@@ -648,7 +668,7 @@ The repository should include the following documentation:
 
 ### Milestone 1: Skeleton repository
 
-- Create package structure.
+- Create package structure and `pyproject.toml` (install editable into `.venv`).
 - Add configuration schema.
 - Add CLI skeleton.
 - Add placeholder FINESSE model.

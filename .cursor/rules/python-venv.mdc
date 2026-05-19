@@ -1,0 +1,54 @@
+---
+description: Use the repository .venv (FINESSE, ZOSPy, project deps)
+alwaysApply: true
+---
+
+# Python environment (.venv)
+
+This repo uses a **local** virtual environment at the repository root:
+
+`.venv/`
+
+It should provide **FINESSE 3**, **ZOSPy** (Zemax OpticStudio via ZOS-API), and dependencies from `pyproject.toml`. Do not use system `python`/`pip` or a shared external venv for this project unless the user explicitly asks.
+
+## Commands
+
+Always use the venv binaries (do not rely on bare `python`, `python3`, or `pip`):
+
+```bash
+.venv/bin/python
+.venv/bin/pip
+```
+
+Or activate once per shell session from the repo root:
+
+```bash
+source .venv/bin/activate
+```
+
+## Agent shell runs
+
+When running Python, pytest, pip, or notebooks in the terminal:
+
+1. Prefer `.venv/bin/python` from the repository root, **or**
+2. `source .venv/bin/activate` in the same command chain before other commands.
+
+Example:
+
+```bash
+source .venv/bin/activate && python -m pytest
+```
+
+## Setup after clone
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+Install **finesse** and **zospy** into this venv per project docs if they are not already present.
+
+## ZOSPy note
+
+ZOSPy needs a working .NET/Mono runtime and Zemax OpticStudio on the machine where it is imported. FINESSE does not. If `import zospy` fails locally, fix the host runtime; do not switch to system Python or another venv.

@@ -1,8 +1,8 @@
 {
-  "python.defaultInterpreterPath": "/Users/mdovale/Work-local/__virtual-environments/optisim/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
   "python.terminal.activateEnvironment": true,
   "terminal.integrated.env.osx": {
-    "VIRTUAL_ENV": "/Users/mdovale/Work-local/__virtual-environments/optisim",
-    "PATH": "/Users/mdovale/Work-local/__virtual-environments/optisim/bin:${env:PATH}"
+    "VIRTUAL_ENV": "${workspaceFolder}/.venv",
+    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
   }
 }
