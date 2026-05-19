@@ -142,7 +142,7 @@ optical-truss-ifo-sim/
 │   └── templates/
 │       └── cavity_scan.kat.j2
 ├── src/
-│   └── oti_tolerance_pipeline/
+│   └── optical_truss_ifo_sim/
 │       ├── __init__.py
 │       ├── config.py
 │       ├── schemas.py
@@ -204,7 +204,7 @@ pip install -e ".[dev]"
 
 Install **finesse** and **zospy** into `.venv` as required (via `pyproject.toml` or documented pins). Use `.venv/bin/python` and `.venv/bin/pip` directly when activation is inconvenient (see `AGENTS.md`).
 
-**`pyproject.toml`** declares this package (`oti_tolerance_pipeline`), its version-pinned dependencies, optional extras (e.g. `dev` for pytest and linters), and the `oti-pipeline` CLI entry point. If ZOSPy import fails, fix the host .NET/Mono and Zemax setup per `.cursor/rules/python-venv.mdc`; do not switch to system Python or another environment.
+**`pyproject.toml`** declares this package (`optical_truss_ifo_sim`, distribution name `optical-truss-ifo-sim`), its version-pinned dependencies, optional extras (e.g. `dev` for pytest and linters), and the `oti-pipeline` CLI entry point. If ZOSPy import fails, fix the host .NET/Mono and Zemax setup per `.cursor/rules/python-venv.mdc`; do not switch to system Python or another environment.
 
 **Heavy simulation stack** (must be present in `.venv`):
 
