@@ -29,7 +29,7 @@ split stages** (see Milestone 2 `finesse-run` with manual or exported beam table
 │ macOS (authoring, git, FINESSE, analysis)                   │
 │  • Edit configs, Python, notebooks                          │
 │  • oti-pipeline validate-config, finesse-run, pytest        │
-│  • scripts/zemax-export-vm.sh  →  trigger VM job          │
+│  • scripts/zemax-export-vm.sh  →  trigger VM job            │
 └───────────────────────────┬─────────────────────────────────┘
                             │ SSH or prlctl exec
                             │ shared repo + data/
